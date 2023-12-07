@@ -1,15 +1,16 @@
-import './App.css';
+import '../App.css';
 import Header from "./Header";
 import Main from './Main';
 import {useEffect, useReducer} from "react";
 import Loader from "./Loader";
 import Error from "./Error";
 import StartScreen from "./StartScreen";
+import Question from "./Question";
 
 const initialState = {
     questions: [],
     status: 'loading', // loading, ready, active, finished, error
-    currentQuestion: 0,
+    index: 0,
     answers: [],
     score: 0
 };
@@ -27,11 +28,16 @@ function reducer(state, action) {
                 ...state,
                 status: 'error'
             };
+        case 'start':
+            return {
+                ...state,
+                status: 'active'
+            };
     }
 }
 
 export default function App() {
-    const [{questions, status}, dispatch] = useReducer(reducer, initialState, undefined);
+    const [{questions, status, index}, dispatch] = useReducer(reducer, initialState, undefined);
     const numbQuestions = questions.length;
 
     useEffect(() => {
@@ -48,7 +54,11 @@ export default function App() {
             <Main>
                 {status === 'loading' && <Loader/>}
                 {status === 'error' && <Error/>}
-                {status === 'ready' && <StartScreen numbQuestions={numbQuestions}/>}
+                {status === 'ready' && <StartScreen
+                    numbQuestions={numbQuestions}
+                    dispatch={dispatch}
+                />}
+                {status === 'active' && <Question question={questions[index]}/>}
 
             </Main>
 
