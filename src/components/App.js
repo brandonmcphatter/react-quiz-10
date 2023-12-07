@@ -11,7 +11,7 @@ const initialState = {
     questions: [],
     status: 'loading', // loading, ready, active, finished, error
     index: 0,
-    answers: [],
+    answer: null,
     score: 0
 };
 
@@ -33,11 +33,20 @@ function reducer(state, action) {
                 ...state,
                 status: 'active'
             };
+        case 'newAnswer':
+            const question = state.questions[state.index];
+            return {
+                ...state,
+                answer: action.payload,
+                score: action.payload === question.correctOption
+                    ? state.score + question.points
+                    : state.score
+            };
     }
 }
 
 export default function App() {
-    const [{questions, status, index}, dispatch] = useReducer(reducer, initialState, undefined);
+    const [{questions, status, index, answer, score}, dispatch] = useReducer(reducer, initialState, undefined);
     const numbQuestions = questions.length;
 
     useEffect(() => {
@@ -55,10 +64,12 @@ export default function App() {
                 {status === 'loading' && <Loader/>}
                 {status === 'error' && <Error/>}
                 {status === 'ready' && <StartScreen
-                    numbQuestions={numbQuestions}
-                    dispatch={dispatch}
+                                        numbQuestions={numbQuestions}
+                                        dispatch={dispatch}
                 />}
-                {status === 'active' && <Question question={questions[index]}/>}
+                {status === 'active' && <Question question={questions[index]}
+                                                  dispatch={dispatch}
+                                                  answer={answer}/>}
 
             </Main>
 
