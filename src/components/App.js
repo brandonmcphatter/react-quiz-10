@@ -124,10 +124,7 @@ export default function App() {
                                       dispatch={dispatch}
                                       highScore={highScore}/>
 
-                        <ResetButton answer={answer}
-                                    dispatch={dispatch}
-                                    index={index}
-                                    numbQuestions={numbQuestions}/>
+                        <ResetButton dispatch={dispatch}/>
                     </>}
 
             </Main>
