@@ -6,6 +6,8 @@ import Loader from "./Loader";
 import Error from "./Error";
 import StartScreen from "./StartScreen";
 import Question from "./Question";
+import NextButton from "./NextButton";
+import Progress from "./Progress";
 
 const initialState = {
     questions: [],
@@ -42,12 +44,19 @@ function reducer(state, action) {
                     ? state.score + question.points
                     : state.score
             };
+        case 'next':
+            return {
+                ...state,
+                index: state.index + 1,
+                answer: null
+            };
     }
 }
 
 export default function App() {
     const [{questions, status, index, answer, score}, dispatch] = useReducer(reducer, initialState, undefined);
     const numbQuestions = questions.length;
+    const totalScore = questions.reduce((acc, question) => acc + question.points, 0);
 
     useEffect(() => {
         fetch('http://localhost:3001/questions')
@@ -63,14 +72,21 @@ export default function App() {
             <Main>
                 {status === 'loading' && <Loader/>}
                 {status === 'error' && <Error/>}
-                {status === 'ready' && <StartScreen
-                                        numbQuestions={numbQuestions}
-                                        dispatch={dispatch}
+                {status === 'ready' && <StartScreen numbQuestions={numbQuestions} dispatch={dispatch}
                 />}
-                {status === 'active' && <Question question={questions[index]}
-                                                  dispatch={dispatch}
-                                                  answer={answer}/>}
+                {status === 'active' &&
+                    <>
+                        <Progress numbQuestions={numbQuestions}
+                                  index={index}
+                                  score={score}
+                                  answer={answer}
+                                  totalScore={totalScore}/>
+                        <Question question={questions[index]}
+                                  dispatch={dispatch}
+                                  answer={answer}/>
 
+                        <NextButton answer={answer} dispatch={dispatch}/>
+                    </>}
             </Main>
 
 
