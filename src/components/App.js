@@ -8,13 +8,16 @@ import StartScreen from "./StartScreen";
 import Question from "./Question";
 import NextButton from "./NextButton";
 import Progress from "./Progress";
+import FinishScreen from "./FinishScreen";
+import ResetButton from "./ResetButton";
 
 const initialState = {
     questions: [],
     status: 'loading', // loading, ready, active, finished, error
     index: 0,
     answer: null,
-    score: 0
+    score: 0,
+    highScore: 0
 };
 
 function reducer(state, action) {
@@ -50,11 +53,30 @@ function reducer(state, action) {
                 index: state.index + 1,
                 answer: null
             };
+        case 'finish':
+            return {
+                ...state,
+                status: 'finished',
+                highScore: state.score > state.highScore ? state.score : state.highScore
+            };
+        case 'restart':
+            return {
+                ...initialState,
+                questions: state.questions,
+                status: 'ready'};
+
     }
 }
 
 export default function App() {
-    const [{questions, status, index, answer, score}, dispatch] = useReducer(reducer, initialState, undefined);
+    const [{
+        questions,
+        status,
+        index,
+        answer,
+        score,
+        highScore
+    }, dispatch] = useReducer(reducer, initialState, undefined);
     const numbQuestions = questions.length;
     const totalScore = questions.reduce((acc, question) => acc + question.points, 0);
 
@@ -69,11 +91,15 @@ export default function App() {
     return (
         <div className="app">
             <Header/>
+
             <Main>
                 {status === 'loading' && <Loader/>}
+
                 {status === 'error' && <Error/>}
+
                 {status === 'ready' && <StartScreen numbQuestions={numbQuestions} dispatch={dispatch}
                 />}
+
                 {status === 'active' &&
                     <>
                         <Progress numbQuestions={numbQuestions}
@@ -85,8 +111,25 @@ export default function App() {
                                   dispatch={dispatch}
                                   answer={answer}/>
 
-                        <NextButton answer={answer} dispatch={dispatch}/>
+                        <NextButton answer={answer}
+                                    dispatch={dispatch}
+                                    index={index}
+                                    numbQuestions={numbQuestions}/>
                     </>}
+
+                {status === 'finished' &&
+                    <>
+                        <FinishScreen score={score}
+                                      totalScore={totalScore}
+                                      dispatch={dispatch}
+                                      highScore={highScore}/>
+
+                        <ResetButton answer={answer}
+                                    dispatch={dispatch}
+                                    index={index}
+                                    numbQuestions={numbQuestions}/>
+                    </>}
+
             </Main>
 
 
