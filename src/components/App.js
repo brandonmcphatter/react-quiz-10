@@ -10,6 +10,10 @@ import NextButton from "./NextButton";
 import Progress from "./Progress";
 import FinishScreen from "./FinishScreen";
 import ResetButton from "./ResetButton";
+import Footer from "./Footer";
+import Timer from "./Timer";
+
+const SEC_PER_QUESTION = 30;
 
 const initialState = {
     questions: [],
@@ -17,7 +21,8 @@ const initialState = {
     index: 0,
     answer: null,
     score: 0,
-    highScore: 0
+    highScore: 0,
+    secRemaining: 10
 };
 
 function reducer(state, action) {
@@ -36,7 +41,8 @@ function reducer(state, action) {
         case 'start':
             return {
                 ...state,
-                status: 'active'
+                status: 'active',
+                secRemaining: state.questions.length * SEC_PER_QUESTION
             };
         case 'newAnswer':
             const question = state.questions[state.index];
@@ -63,8 +69,17 @@ function reducer(state, action) {
             return {
                 ...initialState,
                 questions: state.questions,
-                status: 'ready'};
+                status: 'ready'
+            };
+        case 'tick':
+            return {
+                ...state,
+                secRemaining: state.secRemaining - 1,
+                status: state.secRemaining === 0 ? 'finished' : state.status
+            };
 
+        default:
+            throw new Error('Action not supported');
     }
 }
 
@@ -75,7 +90,8 @@ export default function App() {
         index,
         answer,
         score,
-        highScore
+        highScore,
+        secRemaining
     }, dispatch] = useReducer(reducer, initialState, undefined);
     const numbQuestions = questions.length;
     const totalScore = questions.reduce((acc, question) => acc + question.points, 0);
@@ -111,10 +127,14 @@ export default function App() {
                                   dispatch={dispatch}
                                   answer={answer}/>
 
-                        <NextButton answer={answer}
-                                    dispatch={dispatch}
-                                    index={index}
-                                    numbQuestions={numbQuestions}/>
+                        <Footer>
+                            <Timer dispatch={dispatch}
+                                   secRem={secRemaining}/>
+                            <NextButton answer={answer}
+                                        dispatch={dispatch}
+                                        index={index}
+                                        numbQuestions={numbQuestions}/>
+                        </Footer>
                     </>}
 
                 {status === 'finished' &&
