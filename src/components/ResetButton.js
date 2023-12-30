@@ -1,6 +1,8 @@
 import React from 'react';
+import {useQuiz} from "../contexts/QuizContext";
 
-function ResetButton({dispatch}) {
+function ResetButton() {
+    const {dispatch} = useQuiz();
     return (
         <button className='btn btn-ui'
                 onClick={()=> dispatch({type: 'restart'})}>
